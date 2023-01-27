@@ -4,6 +4,8 @@ RCA_MK2_SEFAudioProcessor::RCA_MK2_SEFAudioProcessor()
 {
     highPassCutoffParam = vts.getRawParameterValue ("hpfc");
     lowPassCutoffParam = vts.getRawParameterValue("lpfc");
+    highPassModParam = vts.getRawParameterValue("hpfMod");
+    lowPassModParam = vts.getRawParameterValue("lpfMod");
 }
 
 void RCA_MK2_SEFAudioProcessor::addParameters (Parameters& params)
@@ -15,6 +17,9 @@ void RCA_MK2_SEFAudioProcessor::addParameters (Parameters& params)
 
     params.push_back (std::make_unique<VTSParam> ("hpfc", "!HP Cutoff [Hz]", juce::String(), fcRange, 20.0f, &freqValToString, &stringToFreqVal));
     params.push_back (std::make_unique<VTSParam> ("lpfc", "!LP Cutoff [Hz]", juce::String(), fcRange, 20000.0f, &freqValToString, &stringToFreqVal));
+
+    params.push_back (std::make_unique<juce::AudioParameterChoice> ("hpfMod", "high pass mod", juce::StringArray { "Off", "On" }, 1));
+    params.push_back (std::make_unique<juce::AudioParameterChoice> ("lpfMod", "high pass mod", juce::StringArray { "Off", "On" }, 1));
     //    params.push_back (std::make_unique<VTSParam> ("zIn", "input impedance [ohms]", juce::String(), fcRange, 20000.0f, &freqValToString, &stringToFreqVal));
 }
 
@@ -44,8 +49,8 @@ void RCA_MK2_SEFAudioProcessor::processAudioBlock (juce::AudioBuffer<float>& buf
     for (int ch = 0; ch < (int) osBlock.getNumChannels(); ++ch)
     {
         //        mk2Sef->setInputImpedance();
-        mk2Sef->setHighPassCutoff(*highPassCutoffParam);
-        mk2Sef->setLowPassCutoff(*lowPassCutoffParam);
+        mk2Sef[ch].setHighPassCutoff(*highPassCutoffParam);
+        mk2Sef[ch].setLowPassCutoff(*lowPassCutoffParam);
 
         auto* x = osBlock.getChannelPointer ((size_t) ch);
 

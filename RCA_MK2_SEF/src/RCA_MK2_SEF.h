@@ -1,3 +1,9 @@
+/*
+ * As described in DAFx paper:
+ * https://dafx2020.mdw.ac.at/proceedings/papers/DAFx20in22_paper_39.pdf
+ *
+ */
+
 #ifndef RCA_MK2_SEF_H_INCLUDED
 #define RCA_MK2_SEF_H_INCLUDED
 
@@ -30,7 +36,6 @@ public:
 
     void reset()
     {
-
         C_HP1.reset();
         C_HP2.reset();
         C_HPm1.reset();
@@ -49,19 +54,22 @@ public:
     void setOutputImpedance(float newZ) {
         if (outputImpedance != newZ) {
             outputImpedance = newZ;
+            Rt.setResistanceValue(outputImpedance);
         }
     }
 
     void setInputImpedance(float newZ) {
         if (inputImpedance != newZ) {
             inputImpedance = newZ;
+            Rin.setResistanceValue(inputImpedance);
         }
     }
 
 
     void setHighPassCutoff(float highPassCutoff) {
-        float C = root2 / (k * highPassCutoff * juce::MathConstants<float>::twoPi);
-        float L = k / (2.0f * root2 * highPassCutoff * juce::MathConstants<float>::twoPi);
+        float wc = highPassCutoff * juce::MathConstants<float>::twoPi;
+        float C = root2 / (k * wc);
+        float L = k / (2.0f * root2 * wc);
 
         C_HPm1.setCapacitanceValue(C);
         C_HPm2.setCapacitanceValue(C);
@@ -74,8 +82,9 @@ public:
     }
 
     void setLowPassCutoff(float lowPassCutoff) {
-        float C = (2.0f * root2) / (k * lowPassCutoff * juce::MathConstants<float>::twoPi);
-        float L = (root2 * k) / (lowPassCutoff * juce::MathConstants<float>::twoPi);
+        float wc = lowPassCutoff * juce::MathConstants<float>::twoPi;
+        float C = (2.0f * root2) / (k * wc);
+        float L = (root2 * k) / wc;
 
         C_LPm1.setCapacitanceValue(C);
         L_LPm1.setInductanceValue(L);
@@ -98,6 +107,9 @@ private:
 
     float inputImpedance = 560;
     float outputImpedance = 560;
+
+    const float root2 = sqrtf(2);
+    float k = 560.0f;
 
     ResistorT<float> Rt {outputImpedance};
     InductorT<float> L_LPm2 {1.0e-3f, 48000};
@@ -140,9 +152,6 @@ private:
 
     WDFSeriesT<float, decltype(Rin), decltype(S1)> S0 {Rin, S1};
     IdealVoltageSourceT<float, decltype(S0)> Vs {S0};
-
-    const float root2 = sqrtf(2);
-    float k = 560.0f;
 
 
 };
