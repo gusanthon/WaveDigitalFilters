@@ -71,13 +71,18 @@ public:
         float C = root2 / (k * wc);
         float L = k / (2.0f * root2 * wc);
 
-        C_HPm1.setCapacitanceValue(C);
-        C_HPm2.setCapacitanceValue(C);
-        L_HPm.setInductanceValue(L);
-
         C_HP1.setCapacitanceValue(C);
         C_HP2.setCapacitanceValue(C);
         L_HP1.setInductanceValue(L);
+
+        if (!highPassMod) {
+            wc = 1e-10f;
+            C = root2 / (k * wc);
+            L = k / (2.0f * root2 * wc);
+        }
+        C_HPm1.setCapacitanceValue(C);
+        C_HPm2.setCapacitanceValue(C);
+        L_HPm.setInductanceValue(L);
 
     }
 
@@ -86,14 +91,37 @@ public:
         float C = (2.0f * root2) / (k * wc);
         float L = (root2 * k) / wc;
 
-        C_LPm1.setCapacitanceValue(C);
-        L_LPm1.setInductanceValue(L);
-        L_LPm2.setInductanceValue(L);
-
         C_LP1.setCapacitanceValue(C);
         L_LP1.setInductanceValue(L);
         L_LP2.setInductanceValue(L);
 
+        if (!lowPassMod) {
+            wc = 1e10f;
+            C = (2.0f * root2) / (k * wc);
+            L = (root2 * k) / wc;
+        }
+
+        C_LPm1.setCapacitanceValue(C);
+        L_LPm1.setInductanceValue(L);
+        L_LPm2.setInductanceValue(L);
+    }
+
+    void setLowPassMod(int mod) {
+        if (lowPassMod != mod) {
+            lowPassMod = mod;
+        }
+    }
+
+    void setHighPassMod(int mod) {
+        if (highPassMod != mod) {
+            highPassMod = mod;
+        }
+    }
+
+    void setKVal(float kVal) {
+        if (k != kVal) {
+            k = kVal;
+        }
     }
 
     inline float processSample (float x) {
@@ -108,51 +136,55 @@ private:
     float inputImpedance = 560;
     float outputImpedance = 560;
 
+    int highPassMod = 1;
+    int lowPassMod = 1;
+
     const float root2 = sqrtf(2);
     float k = 560.0f;
 
+//    float highPassCutoff, lowPassCutoff;
+
     ResistorT<float> Rt {outputImpedance};
-    InductorT<float> L_LPm2 {1.0e-3f, 48000};
+    InductorT<float> L_LPm2 {1.0e-3f, double (48000)};
 
     WDFSeriesT<float, decltype(L_LPm2), decltype(Rt)> S8 {L_LPm2, Rt};
-    CapacitorT<float> C_LPm1 {1.0e-8f, 48000};
+    CapacitorT<float> C_LPm1 {1.0e-8f, double (48000)};
 
     WDFParallelT<float, decltype(C_LPm1), decltype(S8)> P4 {C_LPm1, S8};
-    InductorT<float> L_LPm1 {1.0e-3f, 48000};
+    InductorT<float> L_LPm1 {1.0e-3f, double (48000)};
 
     WDFSeriesT<float, decltype(L_LPm1), decltype(P4)> S7 {L_LPm1, P4};
-    InductorT<float> L_LP2 {1.0e-3f, 48000};
+    InductorT<float> L_LP2 {1.0e-3f, double (48000)};
 
     WDFSeriesT<float, decltype(L_LP2), decltype(S7)> S6 {L_LP2, S7};
-    CapacitorT<float> C_LP1 {1.0e-8f, 48000};
+    CapacitorT<float> C_LP1 {1.0e-8f, double (48000)};
 
     WDFParallelT<float, decltype(C_LP1), decltype(S6)> P3 {C_LP1, S6};
-    InductorT<float> L_LP1 {1.0e-3f, 48000};
+    InductorT<float> L_LP1 {1.0e-3f, double (48000)};
 
     WDFSeriesT<float, decltype(L_LP1), decltype(P3)> S5 {L_LP1, P3};
-    CapacitorT<float> C_HP2 {1.0e-8f, 48000};
+    CapacitorT<float> C_HP2 {1.0e-8f, double (48000)};
 
     WDFSeriesT<float, decltype(C_HP2), decltype(S5)> S4 {C_HP2, S5};
-    InductorT<float> L_HP1 {1.0e-3f, 48000};
+    InductorT<float> L_HP1 {1.0e-3f, double (48000)};
 
     WDFParallelT<float, decltype(L_HP1), decltype(S4)> P2 {L_HP1, S4};
-    CapacitorT<float> C_HP1 {5.0e-8f, 48000};
+    CapacitorT<float> C_HP1 {5.0e-8f, double (48000)};
 
     WDFSeriesT<float, decltype(C_HP1), decltype(P2)> S3 {C_HP1, P2};
-    CapacitorT<float> C_HPm2 {5.0e-8f, 48000};
+    CapacitorT<float> C_HPm2 {5.0e-8f, double (48000)};
 
     WDFSeriesT<float, decltype(C_HPm2), decltype(S3)> S2 {C_HPm2, S3};
-    InductorT<float> L_HPm {1.0e-3f, 48000.f};
+    InductorT<float> L_HPm {1.0e-3f, double (48000)};
 
     WDFParallelT<float, decltype(L_HPm), decltype(S2)> P1 {L_HPm, S2};
-    CapacitorT<float> C_HPm1 {5.0e-8f, 48000.f};
+    CapacitorT<float> C_HPm1 {5.0e-8f, double (48000)};
 
     WDFSeriesT<float, decltype(C_HPm1), decltype(P1)> S1 {C_HPm1, P1};
     ResistorT<float> Rin {inputImpedance};
 
     WDFSeriesT<float, decltype(Rin), decltype(S1)> S0 {Rin, S1};
     IdealVoltageSourceT<float, decltype(S0)> Vs {S0};
-
 
 };
 

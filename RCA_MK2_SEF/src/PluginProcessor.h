@@ -22,9 +22,21 @@ private:
     std::atomic<float>* highPassCutoffParam = nullptr;
     std::atomic<float>* lowPassCutoffParam = nullptr;
 
-//    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> hpfSmooth[2];
     std::atomic<float>* highPassModParam = nullptr;
     std::atomic<float>* lowPassModParam = nullptr;
+
+    juce::SmoothedValue<float> hpfSmooth[2];
+    juce::SmoothedValue<float> lpfSmooth[2];
+
+    int prevHighPassMod = 1;
+    int prevLowPassMod = 1;
+
+    std::atomic<float>* zInputParam = nullptr;
+    std::atomic<float>* zOutputParam = nullptr;
+
+    std::atomic<float>* kValParam = nullptr;
+
+    std::atomic<float>* gainParam = nullptr;
 
 
     RCA_MK2_SEF mk2Sef[2];
