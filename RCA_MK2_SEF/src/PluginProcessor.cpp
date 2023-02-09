@@ -1,6 +1,5 @@
 #include "PluginProcessor.h"
 
-
 juce::String resValToString (float resVal)
 {
     if (resVal <= 1000.0f)
@@ -9,6 +8,15 @@ juce::String resValToString (float resVal)
     return juce::String (resVal / 1000.0f, 2, false) + " kOhm";
 }
 
+float stringToResVal (const juce::String& s)
+{
+    auto resVal = s.getFloatValue();
+
+    if (s.getLastCharacter() == 'k' || s.endsWith ("kOhm") || s.endsWith ("kohm"))
+        resVal *= 1000.0f;
+
+    return resVal;
+}
 
 RCA_MK2_SEFAudioProcessor::RCA_MK2_SEFAudioProcessor()
 {
@@ -44,12 +52,12 @@ void RCA_MK2_SEFAudioProcessor::addParameters (Parameters& params)
     params.push_back (std::make_unique<juce::AudioParameterChoice> ("hpfMod", "high pass mod", juce::StringArray { "Off", "On" }, 1));
     params.push_back (std::make_unique<juce::AudioParameterChoice> ("lpfMod", "low pass mod", juce::StringArray { "Off", "On" }, 1));
 
-    params.push_back (std::make_unique<VTSParam> ("zInput", "input Z [ohm]", juce::String(), lpfcRange, 560.0f, &resValToString, &stringToFreqVal));
-    params.push_back (std::make_unique<VTSParam> ("zOutput", "output Z [ohm]", juce::String(), lpfcRange, 560.0f, &resValToString, &stringToFreqVal));
+    params.push_back (std::make_unique<VTSParam> ("zInput", "input Z [ohm]", juce::String(), lpfcRange, 560.0f, &resValToString, &stringToResVal));
+    params.push_back (std::make_unique<VTSParam> ("zOutput", "output Z [ohm]", juce::String(), lpfcRange, 560.0f, &resValToString, &stringToResVal));
 
-    params.push_back (std::make_unique<VTSParam> ("kVal", "constant k [ohm]", juce::String(), lpfcRange, 560.0f, &resValToString, &stringToFreqVal));
+    params.push_back (std::make_unique<VTSParam> ("kVal", "constant k [ohm]", juce::String(), lpfcRange, 560.0f, &resValToString, &stringToResVal));
 
-    params.push_back (std::make_unique<VTSParam> ("gain", "gain [dB]", juce::String(), gainRange, 5.0f, &gainValToString, &stringToFreqVal));
+    params.push_back (std::make_unique<VTSParam> ("gain", "gain [dB]", juce::String(), gainRange, 5.0f, &gainValToString, &stringToGainVal));
 }
 
 void RCA_MK2_SEFAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
